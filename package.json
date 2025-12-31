@@ -1,0 +1,88 @@
+{
+  "name": "aether-os",
+  "version": "2.2.0",
+  "description": "AETHER-OS - Local AI Desktop Suite with eDEX-UI Aesthetic",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux",
+    "generate-manifest": "node scripts/generate-manifest.js"
+  },
+  "keywords": [
+    "electron",
+    "ai",
+    "desktop",
+    "ollama",
+    "productivity"
+  ],
+  "author": "AetherOS Team",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.10"
+  },
+  "build": {
+    "appId": "com.aether.os",
+    "productName": "AETHER-OS",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!envs/**/*",
+      "!.aether_core/**/*",
+      "!dist/**/*",
+      "!installer/**/*",
+      "!*.md",
+      "!.git/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "src/tools",
+        "to": "tools"
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "build/icon.ico"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "build/icon.icns",
+      "category": "public.app-category.productivity"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "icon": "build/icon.png",
+      "category": "Utility"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "artifactName": "${productName}-Setup-${version}.${ext}"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "AetherO-S",
+      "repo": "AetherOS"
+    }
+  }
+}

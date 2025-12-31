@@ -1,0 +1,9 @@
+{
+    "name": "calculator",
+    "displayName": "Calculator",
+    "port": 5100,
+    "category": "plugin",
+    "description": "A simple calculator tool",
+    "author": "AETHER-OS",
+    "version": "1.0.0"
+}

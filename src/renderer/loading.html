@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>AETHER-OS</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000000;
+            color: #ffffff;
+            font-family: 'Share Tech Mono', 'Consolas', monospace;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            -webkit-app-region: drag;
+        }
+        
+        /* Background console - dim and atmospheric */
+        .background-console {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.08);
+            line-height: 1.4;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .console-line {
+            white-space: nowrap;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Scanlines overlay */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15) 0px,
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            z-index: 1000;
+        }
+        
+        /* Subtle vignette effect */
+        .vignette {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.3) 100%);
+            z-index: 999;
+        }
+        
+        /* Center content */
+        .center-content {
+            position: relative;
+            z-index: 100;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 4rem;
+            font-weight: 400;
+            letter-spacing: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #ffffff;
+            text-shadow: 
+                0 0 10px rgba(255, 255, 255, 0.8),
+                0 0 20px rgba(255, 255, 255, 0.6),
+                0 0 40px rgba(255, 255, 255, 0.4),
+                0 0 80px rgba(255, 255, 255, 0.2);
+            animation: glow 3s ease-in-out infinite;
+        }
+        
+        @keyframes glow {
+            0%, 100% { 
+                text-shadow: 
+                    0 0 10px rgba(255, 255, 255, 0.8),
+                    0 0 20px rgba(255, 255, 255, 0.6),
+                    0 0 40px rgba(255, 255, 255, 0.4),
+                    0 0 80px rgba(255, 255, 255, 0.2);
+            }
+            50% { 
+                text-shadow: 
+                    0 0 20px rgba(255, 255, 255, 1),
+                    0 0 40px rgba(255, 255, 255, 0.8),
+                    0 0 60px rgba(255, 255, 255, 0.6),
+                    0 0 100px rgba(255, 255, 255, 0.3);
+            }
+        }
+        
+        .subtitle {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 0.8rem;
+            margin-bottom: 3rem;
+        }
+        
+        .progress-container {
+            width: 400px;
+            margin: 0 auto;
+        }
+        
+        .progress-bar {
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            border-radius: 1px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffffff, #88ccff);
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px #fff, 0 0 20px rgba(255, 255, 255, 0.5);
+            border-radius: 1px;
+        }
+        
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .status-text {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 1.5rem;
+            min-height: 1.2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .status-text.error {
+            color: rgba(255, 100, 100, 0.8);
+        }
+        
+        /* Corner brackets */
+        .corner {
+            position: fixed;
+            width: 40px;
+            height: 40px;
+            border-color: rgba(255, 255, 255, 0.15);
+            border-style: solid;
+            z-index: 50;
+        }
+        
+        .corner.tl { top: 30px; left: 30px; border-width: 1px 0 0 1px; }
+        .corner.tr { top: 30px; right: 30px; border-width: 1px 1px 0 0; }
+        .corner.bl { bottom: 30px; left: 30px; border-width: 0 0 1px 1px; }
+        .corner.br { bottom: 30px; right: 30px; border-width: 0 1px 1px 0; }
+        
+        /* Grid pattern */
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: 0;
+        }
+        
+        /* Tool indicator dots */
+        .tool-indicators {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        
+        .tool-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            transition: all 0.3s ease;
+        }
+        
+        .tool-dot.active {
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        
+        .tool-dot.ready {
+            background: #4ade80;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-bg"></div>
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
+    
+    <div class="corner tl"></div>
+    <div class="corner tr"></div>
+    <div class="corner bl"></div>
+    <div class="corner br"></div>
+    
+    <div class="background-console" id="bgConsole"></div>
+    
+    <div class="center-content">
+        <div class="logo">AETHER</div>
+        <div class="subtitle">SYSTEM ORCHESTRATOR</div>
+        
+        <div class="status-text" id="statusText">INITIALIZING NEURAL PATHWAYS</div>
+        
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-info">
+                <span id="stageText">BOOT</span>
+                <span id="percentText">0%</span>
+            </div>
+        </div>
+        
+        <div class="tool-indicators" id="toolIndicators"></div>
+    </div>
+
+    <script>
+        const progressFill = document.getElementById('progressFill');
+        const statusText = document.getElementById('statusText');
+        const stageText = document.getElementById('stageText');
+        const percentText = document.getElementById('percentText');
+        const bgConsole = document.getElementById('bgConsole');
+        const toolIndicators = document.getElementById('toolIndicators');
+        
+        let lineCount = 0;
+        const maxLines = 60;
+        const toolDots = new Map();
+        
+        // Create tool indicator dots
+        const tools = [
+            'ollama_chat', 'image_gen', 'tts_engine', 'stt_engine', 'video_gen',
+            'file_manager', 'notes', 'system_monitor', 'terminal', 'code_editor', 'spreadsheet_engine'
+        ];
+        
+        tools.forEach(tool => {
+            const dot = document.createElement('div');
+            dot.className = 'tool-dot';
+            dot.title = tool.replace(/_/g, ' ');
+            toolIndicators.appendChild(dot);
+            toolDots.set(tool, dot);
+        });
+        
+        function addConsoleLine(text) {
+            const line = document.createElement('div');
+            line.className = 'console-line';
+            const time = new Date().toTimeString().split(' ')[0];
+            line.textContent = `[${time}] ${text}`;
+            bgConsole.appendChild(line);
+            lineCount++;
+            
+            if (lineCount > maxLines) {
+                bgConsole.removeChild(bgConsole.firstChild);
+            }
+            
+            bgConsole.scrollTop = bgConsole.scrollHeight;
+        }
+        
+        // Initial atmospheric lines
+        const initLines = [
+            'AETHER-OS v2.1.0 BOOT SEQUENCE INITIATED',
+            'Checking system integrity...',
+            'Loading kernel modules...',
+            'Initializing neural pathways...',
+            'Scanning for Python environment...'
+        ];
+        
+        initLines.forEach((line, i) => {
+            setTimeout(() => addConsoleLine(line), i * 200);
+        });
+        
+        // Listen for boot progress
+        window.aether.onBootProgress((data) => {
+            progressFill.style.width = data.percent + '%';
+            percentText.textContent = data.percent + '%';
+            stageText.textContent = data.stage.toUpperCase();
+            statusText.textContent = data.message.toUpperCase();
+            statusText.classList.remove('error');
+            addConsoleLine(data.message);
+            
+            // Highlight current tool
+            if (data.tool && toolDots.has(data.tool)) {
+                toolDots.forEach(dot => dot.classList.remove('active'));
+                toolDots.get(data.tool).classList.add('active');
+            }
+        });
+        
+        // Listen for errors
+        window.aether.onBootError((data) => {
+            statusText.textContent = 'ERROR: ' + data.message.toUpperCase();
+            statusText.classList.add('error');
+            addConsoleLine('ERROR: ' + data.message);
+            if (data.details) {
+                addConsoleLine('DETAILS: ' + data.details);
+            }
+        });
+        
+        // Listen for tool ready events
+        window.aether.onToolReady((data) => {
+            addConsoleLine(`${data.tool.toUpperCase()} ONLINE :: PORT ${data.port}`);
+            if (toolDots.has(data.tool)) {
+                toolDots.get(data.tool).classList.remove('active');
+                toolDots.get(data.tool).classList.add('ready');
+            }
+        });
+        
+        // Animated typing effect for status
+        let currentStatus = '';
+        function typeStatus(text) {
+            if (text === currentStatus) return;
+            currentStatus = text;
+            // Direct update for speed
+            statusText.textContent = text;
+        }
+    </script>
+</body>
+</html>

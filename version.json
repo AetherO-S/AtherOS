@@ -1,0 +1,13 @@
+{
+  "version": "2.2.0",
+  "releaseDate": "2024-12-30",
+  "changelog": [
+    "Added plugin marketplace - download and install plugins from the launcher",
+    "Plugins now work like apps - launch from Plugins tab in launcher",
+    "Fixed auto-update system - now checks GitHub releases properly",
+    "Moved Viral Video Studio to downloadable plugin (reduces app size)",
+    "Added plugin uninstall functionality",
+    "Improved error handling and status messages",
+    "Fixed boot sequence race condition from v2.1"
+  ]
+}
